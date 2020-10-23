@@ -1,0 +1,73 @@
+# -*- mode:restclinet -*-
+#
+:base_route = http://localhost:8000/api
+#
+#
+:auth = Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkYW4iLCJpYXQiOjE2MDM0MzQ3NTAsImV4cCI6MTYwMzUyMTE1MH0.Kwy1bsO1WQo1zoFV2AaQtJ8QqQzL33J8yt_MOUu6GuM
+
+#
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+    Auth Routes
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+# Register
+POST :base_route/auth/register
+content-type: application/json
+
+{
+    "name": "Jannatul Adan",
+    "username": "adan",
+    "email": "adan@email.com",
+    "password": "Hello123"
+}
+
+# login
+POST :base_route/auth/login
+content-type: application/json
+
+{
+    "email": "zayan@email.com",
+    "password": "Hello123"
+}
+
+
+# Get Current Auth User
+GET :base_route/auth/me
+Authorization: :auth
+
+content-type: application/json
+
+###
+
+# Forgot password
+POST :base_route/auth/forgot-password
+content-type: application/json
+
+{
+    "email": "zayan@email.com"
+}
+
+##
+# Reset password
+PATCH :base_route/auth/reset-password?token=3fcc0a94-266f-45d8-8c34-1f1764520616
+content-type: application/json
+
+{
+    "password": "Hello123"
+}
+
+#
+#
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+    Users Routes
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+# Gett All Users
+GET :base_route/users
+
+# Get user by id
+GET :base_route/users/996c5501-ef0c-4a56-8bad-b431a29d650e
+
+# Get user by username/email
+GET :base_route/users/user/jewel
