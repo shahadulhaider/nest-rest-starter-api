@@ -3,7 +3,7 @@
 :base_route = http://localhost:8000/api
 #
 #
-:auth = Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkYW4iLCJpYXQiOjE2MDM0MzQ3NTAsImV4cCI6MTYwMzUyMTE1MH0.Kwy1bsO1WQo1zoFV2AaQtJ8QqQzL33J8yt_MOUu6GuM
+:auth = Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InpheWFuIiwiaWF0IjoxNjAzNTI1MjAwLCJleHAiOjE2MDM2MTE2MDB9.z6e29hES5t45H_3RAziRWbaHZRJ1QyhpKc_c2uo8J0w
 
 #
 
@@ -16,9 +16,9 @@ POST :base_route/auth/register
 content-type: application/json
 
 {
-    "name": "Jannatul Adan",
-    "username": "adan",
-    "email": "adan@email.com",
+    "name": "Shahadul Haider",
+    "username": "haider",
+    "email": "haider@email.com",
     "password": "Hello123"
 }
 
@@ -38,8 +38,13 @@ Authorization: :auth
 
 content-type: application/json
 
-###
+#
+# Verify email
+PATCH :base_route/auth/verify?token=cceb7eab-04e8-4a40-ac75-de25b359424b
+Authorization: :auth
+content-type: application/json
 
+#
 # Forgot password
 POST :base_route/auth/forgot-password
 content-type: application/json
@@ -50,7 +55,8 @@ content-type: application/json
 
 ##
 # Reset password
-PATCH :base_route/auth/reset-password?token=3fcc0a94-266f-45d8-8c34-1f1764520616
+PATCH :base_route/auth/reset-password?token=fa514fb2-a77a-4eae-9f08-6da03141dd28
+Authorization: :auth
 content-type: application/json
 
 {

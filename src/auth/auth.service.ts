@@ -18,7 +18,6 @@ import { AuthPayload } from './auth.payload';
 import { AuthResponse } from './auth.ro';
 import { LoginUserDto } from './login-user.dto';
 import { RegisterUserDto } from './register-user.dto';
-import { ResetPasswordDto } from './reset-password.dto';
 
 @Injectable()
 export class AuthService {
@@ -36,11 +35,6 @@ export class AuthService {
     try {
       const user = this.usersRepo.create(data);
       await user.save();
-
-      // genrate jwt token
-      const token = this.jwtService.sign({
-        username: user.username,
-      } as AuthPayload);
 
       // set redis token
       const uuid = uuidv4();
@@ -63,8 +57,12 @@ export class AuthService {
       });
 
       console.log('Message sent: %s', info.messageId);
-
       console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
+
+      // genrate jwt token
+      const token = this.jwtService.sign({
+        username: user.username,
+      } as AuthPayload);
 
       return this.buildResponse(token, user);
     } catch (err) {
@@ -112,17 +110,25 @@ export class AuthService {
     return this.buildResponse(token, me);
   }
 
-  async verifyEmail(token: string): Promise<boolean> {
-    console.log(token);
-
+  async verifyEmail(token: string, username: string): Promise<boolean> {
     try {
       const key = this.VERIFY_EMAIL_PREFIX + token;
       const userId = await this.redis.get(key);
 
+      if (!userId) {
+        throw new HttpException('Token expired', 400);
+      }
+
+      const owner = await this.usersRepo.findOne({ username });
+
+      if (!owner || owner.id !== userId) {
+        throw new UnauthorizedException();
+      }
+
       const user = await this.usersRepo.findOne(userId);
 
       if (!user) {
-        throw new UnauthorizedException();
+        throw new NotFoundException();
       }
 
       user.verified = true;
@@ -167,7 +173,6 @@ export class AuthService {
       });
 
       console.log('Message sent: %s', info.messageId);
-
       console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
 
       return true;
@@ -176,22 +181,30 @@ export class AuthService {
     }
   }
 
-  async resetPassword(token: string, password: string): Promise<boolean> {
+  async resetPassword(
+    token: string,
+    password: string,
+    username: string,
+  ): Promise<boolean> {
     try {
       const key = this.FORGOT_PASSWORD_PREFIX + token;
       const userId = await this.redis.get(key);
 
       if (!userId) {
-        throw new HttpException('Token expired', 400);
+        throw new HttpException('Token expired', 403);
+      }
+
+      const owner = await this.usersRepo.findOne({ username });
+
+      if (!owner || owner.id !== userId) {
+        throw new UnauthorizedException();
       }
 
       const user = await this.usersRepo.findOne(userId);
 
       if (!user) {
-        throw new UnauthorizedException();
+        throw new NotFoundException();
       }
-
-      console.log(password);
 
       user.password = await argon2.hash(password);
 
@@ -211,7 +224,6 @@ export class AuthService {
       });
 
       console.log('Message sent: %s', info.messageId);
-
       console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
 
       return true;

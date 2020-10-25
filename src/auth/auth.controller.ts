@@ -38,9 +38,13 @@ export class AuthController {
     return await this.authService.whoami(username);
   }
 
-  @Get('/verify')
-  async verifyEmail(@Query('token') token: string): Promise<boolean> {
-    return this.authService.verifyEmail(token);
+  @Patch('/verify')
+  @UseGuards(AuthGuard())
+  async verifyEmail(
+    @Query('token') token: string,
+    @User() { username }: UserEntity,
+  ): Promise<boolean> {
+    return this.authService.verifyEmail(token, username);
   }
 
   @Post('/forgot-password')
@@ -49,10 +53,12 @@ export class AuthController {
   }
 
   @Patch('/reset-password')
+  @UseGuards(AuthGuard())
   async resetPassword(
     @Query('token') token: string,
     @Body() { password }: ResetPasswordDto,
+    @User() { username }: UserEntity,
   ): Promise<boolean> {
-    return this.authService.resetPassword(token, password);
+    return this.authService.resetPassword(token, password, username);
   }
 }
